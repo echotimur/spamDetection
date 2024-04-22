@@ -1,1 +1,1 @@
-s
+In this directory you can place files to create a model
