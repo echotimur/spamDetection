@@ -151,7 +151,7 @@ int main(){
   for(const auto & entry : fs::directory_iterator(path))
     numberOfFile++;
 
-  string *arrFileName = new string[numberOfFile]; //ошибка ? (заменить на динамический массив) : (оставить как есть)
+  string *arrFileName = new string[numberOfFile];
 
   int i = 0;
   for(const auto & entry : fs::directory_iterator(path)){
