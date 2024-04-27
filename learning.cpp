@@ -65,7 +65,7 @@ void model_make(){
   fstream prom("../prom.txt", ios::app);
   fstream model("../model.txt", ios::app);
 
-  if(!study.is_open() && !model.is_open()){
+  if(!study.is_open() || !model.is_open() || !prom.is_open()){
     cout<<"Error";
     exit(1);
   }
