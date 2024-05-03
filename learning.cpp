@@ -19,6 +19,19 @@ const string predlogi[] = {
 const int sizePredlogi = sizeof(predlogi) / sizeof(string);
 
 
+
+void split(string &str, char delim, vector<string> &v){
+  size_t start;
+  size_t end = 0;
+
+  while ((start = str.find_first_not_of(delim, end)) != string::npos){
+    end = str.find(delim, start);
+    v.push_back(str.substr(start, end - start));
+  }
+}
+
+
+
 string convertToString(char* a, int size){
 
   int i;
@@ -80,7 +93,7 @@ void model_make(){
 
     if(wordCount == 999){
 
-      cout<<"1000 words processed"<<endl;
+      cout<<"+1000 words processed"<<endl;
 
       study>>transit;
       transit = punctuation_marks(transit);
@@ -111,7 +124,7 @@ void model_make(){
           if(word == predlogi[i]) skip = true;
         }
         if(skip == false)
-        prom << word << ": " << count << "\n";
+        prom << word << " " << count << "\n";
         skip = false;
       }
 
@@ -157,16 +170,47 @@ void model_make(){
       skip = false;
     }
 
-    allWords.clear();
-    sortWord.clear();
-    prom.close();
   }
 
+  allWords.clear();
+  sortWord.clear();
+  prom.close();
+
   fstream prom("../prom.txt", ios::in);
-  string num;
+  int num = 0;
+  wordCount = 0;
+  string transit2;
+  vector<string> a;
+  vector<string> b;
 
   while(getline(prom, transit)){
-    // NOW HERE
+    // NOW HERE, DEBUG
+    if(num == 999) break;
+
+    split(transit, ' ', a);
+    while(getline(prom, transit2)){
+      
+      if(num < 999){
+        num++;
+        continue;
+      }
+
+      split(transit2, ' ', b);
+      if(a[0] == b[0]){
+
+        wordCount = stoi(a[1]) + stoi(b[2]);
+        a[1] = to_string(wordCount);
+
+        for(const auto &word : a){
+          model<<word<<' ';
+        }
+        model<<"\n";
+
+        b.clear();
+      }
+
+      a.clear();
+    }
   }
 
   model.close();
@@ -222,7 +266,7 @@ int main(){
   for(const auto & entry : fs::directory_iterator(path))
     numberOfFile++;
 
-  string *arrFileName = new string[numberOfFile];
+  string *arrFileName = new string[numberOfFile]; //ошибка ? (заменить на динамический массив) : (оставить как есть)
 
   int i = 0;
   for(const auto & entry : fs::directory_iterator(path)){
