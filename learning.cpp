@@ -10,6 +10,7 @@ using namespace std;
 
 const char specSymbol[] = {'!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '-', '=', '<', '>', '/', '?', ';', ':', '|', '[', ']', '{', '}', '`', '~', ',', '.', '\\'};
 const int sizeSpecSymbol = sizeof(specSymbol) / sizeof(char);
+// const auti sizeSpecSymbol = size(specSymbol);
 const string predlogi[] = {
   "без", "между", "под", "в", "на", "по", "вокруг", "о", "про", "до", "об", "с", "для", "около", "из-за", "за", "от", "из-под", "к", "перед", "и", "не", "а", "во", "из",
   "как", "со",
@@ -17,6 +18,7 @@ const string predlogi[] = {
   "Как", "Со"
 };
 const int sizePredlogi = sizeof(predlogi) / sizeof(string);
+// const auto sizePredlogi = size(predlogi);
 
 
 
@@ -124,7 +126,7 @@ void model_make(){
           if(word == predlogi[i]) skip = true;
         }
         if(skip == false)
-        prom << word << " " << count << "\n";
+          prom << word << " " << count << "\n";
         skip = false;
       }
 
@@ -166,7 +168,7 @@ void model_make(){
         if(word == predlogi[i]) skip = true;
       }
       if(skip == false)
-      prom << word << " " << count << "\n";
+        prom << word << " " << count << "\n";
       skip = false;
     }
 
@@ -176,20 +178,39 @@ void model_make(){
   sortWord.clear();
   prom.close();
 
-  fstream prom("../prom.txt", ios::in);
+  prom.open("../prom.txt", ios::in);
   int num = 0;
+  int num1 = 0;
+  bool add = true;
   wordCount = 0;
-  string transit2;
+  string transit2 = "";
   vector<string> a;
   vector<string> b;
 
+  fstream prom1("../prom1.txt", ios::app);
+
+  if(!prom1.is_open()){
+    cout<<"Error";
+    exit(1);
+  }
+
   while(getline(prom, transit)){
-    // NOW HERE, DEBUG
-    if(num == 999) break;
+    prom1<<transit<<"\n";
+  }
+  transit = "";
+  prom.close();
+  prom1.close();
+
+  prom.open("../prom.txt", ios::in);
+  while(getline(prom, transit)){
+
+    if(num1 == 999) break;
 
     split(transit, ' ', a);
-    while(getline(prom, transit2)){
-      
+
+    prom1.open("../prom1.txt", ios::in);
+    while(getline(prom1, transit2)){
+
       if(num < 999){
         num++;
         continue;
@@ -198,7 +219,9 @@ void model_make(){
       split(transit2, ' ', b);
       if(a[0] == b[0]){
 
-        wordCount = stoi(a[1]) + stoi(b[2]);
+        add = false;
+
+        wordCount = stoi(a[1]) + stoi(b[1]);
         a[1] = to_string(wordCount);
 
         for(const auto &word : a){
@@ -207,10 +230,24 @@ void model_make(){
         model<<"\n";
 
         b.clear();
+        wordCount = 0;
+        num = 0;
       }
 
-      a.clear();
+      num1++;
+
     }
+
+    if(add == true){
+      for(const auto &word : a){
+        model<<word<<' ';
+      }
+      model<<"\n";
+    }
+
+    a.clear();
+
+    prom1.close();
   }
 
   model.close();
@@ -256,6 +293,7 @@ int main(){
   remove("../study.txt");
 
   remove("../prom.txt");
+  remove("../prom1.txt");
 
   remove("../model.txt");
 
