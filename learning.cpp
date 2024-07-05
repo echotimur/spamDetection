@@ -9,16 +9,15 @@ namespace fs = std::filesystem;
 using namespace std;
 
 const char specSymbol[] = {'!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', '-', '=', '<', '>', '/', '?', ';', ':', '|', '[', ']', '{', '}', '`', '~', ',', '.', '\\'};
-const int sizeSpecSymbol = sizeof(specSymbol) / sizeof(char);
-// const auti sizeSpecSymbol = size(specSymbol);
+const auto sizeSpecSymbol = size(specSymbol);
+
 const string predlogi[] = {
   "без", "между", "под", "в", "на", "по", "вокруг", "о", "про", "до", "об", "с", "для", "около", "из-за", "за", "от", "из-под", "к", "перед", "и", "не", "а", "во", "из",
   "как", "со",
   "Без", "Между", "Под", "В", "На", "По", "Вокруг", "О", "Про", "До", "Об", "С", "Для", "Около", "Из-за", "За", "От", "Из-под", "К", "Перед", "И", "Не", "А", "Во", "Из",
   "Как", "Со"
 };
-const int sizePredlogi = sizeof(predlogi) / sizeof(string);
-// const auto sizePredlogi = size(predlogi);
+const auto sizePredlogi = size(predlogi);
 
 
 
@@ -34,7 +33,7 @@ void split(string &str, char delim, vector<string> &v){
 
 
 
-string convertToString(char* a, int size){
+string charConvertToString(char* a, int size){
 
   int i;
   string s = "";
@@ -65,7 +64,7 @@ string punctuation_marks(string checkingWord){
     } else continue;
   }
 
-  checkingWord = convertToString(checkArray1, length);
+  checkingWord = charConvertToString(checkArray1, length);
 
   delete [] checkArray1;
 
@@ -74,10 +73,38 @@ string punctuation_marks(string checkingWord){
 
 
 
+void selection_create(){
+
+  fstream model("../model.txt", ios::in);
+
+  string buffer = "";
+
+  vector <string> a;
+  map <int, string> toSelect;
+
+  while(getline(model, buffer)){
+    split(buffer, ' ', a);
+    toSelect.emplace(stoi(a[1]), a[0]);
+    a.clear();
+  }
+
+  fstream selection("../selection.txt", ios::app);
+
+  selection<<"Нere is the general information about the original files:"<<endl;
+
+  for(const auto& [count, word] : toSelect)
+    selection<<count<<": "<<word<<endl;
+
+  toSelect.clear();
+
+}
+
+
+
 void model_make(){
 
-  fstream study("../study.txt", ios::in);
-  fstream prom("../prom.txt", ios::app);
+  fstream study("../temporary_files/study.txt", ios::in);
+  fstream prom("../temporary_files/prom.txt", ios::app);
   fstream model("../model.txt", ios::app);
 
   if(!study.is_open() || !model.is_open() || !prom.is_open()){
@@ -92,10 +119,10 @@ void model_make(){
   map<string, int> sortWord;
 
   while(!study.eof()){
-
+    // в этом цикле мы добавляем 1000 слов и делаем предварительный анализ
     if(wordCount == 999){
 
-      cout<<"+1000 words processed"<<endl;
+      cout<<"+1000 words processed"<<endl<<"---"<<endl;
 
       study>>transit;
       transit = punctuation_marks(transit);
@@ -142,7 +169,7 @@ void model_make(){
     wordCount++;
     transit = "";
   }
-
+  // а здесь мы добиваем остаток, если условно слов 1002
   if(allWords.size() > 1){
     for(int i=0; i<allWords.size()-1; i++){
       for(int j=0; j<allWords.size()-1; j++){
@@ -178,7 +205,7 @@ void model_make(){
   sortWord.clear();
   prom.close();
 
-  prom.open("../prom.txt", ios::in);
+  prom.open("../temporary_files/prom.txt", ios::in);
   int num = 0;
   int num1 = 0;
   bool add = true;
@@ -187,28 +214,30 @@ void model_make(){
   vector<string> a;
   vector<string> b;
 
-  fstream prom1("../prom1.txt", ios::app);
+  fstream prom1("../temporary_files/prom1.txt", ios::app);
 
   if(!prom1.is_open()){
     cout<<"Error";
     exit(1);
   }
-
+  // создаём дубликат файла prom (просто копируем содержимое из prom), он нам понадобится чуть ниже для окончательной сортировки
   while(getline(prom, transit)){
     prom1<<transit<<"\n";
   }
   transit = "";
+  // необходимо закрыть эти текстовые потоки, а потом снова открыть, чтобы указатель считывания переместился с конца файла в начало
+  // (да, есть другие реализации, но такой способ первым пришёл в голову, наличие двух transit-ов обусловлено тем же самым):
   prom.close();
   prom1.close();
 
-  prom.open("../prom.txt", ios::in);
+  prom.open("../temporary_files/prom.txt", ios::in);
   while(getline(prom, transit)){
 
     if(num1 == 999) break;
 
     split(transit, ' ', a);
 
-    prom1.open("../prom1.txt", ios::in);
+    prom1.open("../temporary_files/prom1.txt", ios::in);
     while(getline(prom1, transit2)){
 
       if(num < 999){
@@ -259,8 +288,8 @@ void model_make(){
 
 
 void study_func(string fileName[], int numFile){
-
-  fstream study("../study.txt", ios::app);
+  // просто собираем все исходные текстовые в один...
+  fstream study("../temporary_files/study.txt", ios::app);
 
   long int wordCount = 0;
 
@@ -280,7 +309,7 @@ void study_func(string fileName[], int numFile){
 
   }
 
-  cout<<"Total number of words: "<<wordCount<<endl;
+  cout<<"Total number of words: "<<wordCount<<endl<<"----------------"<<endl;
 
   study.close();
 
@@ -289,13 +318,14 @@ void study_func(string fileName[], int numFile){
 
 
 int main(){
+  // очищаем все документы, перед началом. (Важно!:сделать контроль версий model.txt)
+  remove("../temporary_files/study.txt");
 
-  remove("../study.txt");
-
-  remove("../prom.txt");
-  remove("../prom1.txt");
+  remove("../temporary_files/prom.txt");
+  remove("../temporary_files/prom1.txt");
 
   remove("../model.txt");
+  remove("../selection.txt");
 
   int numberOfFile = 0;
 
@@ -308,22 +338,28 @@ int main(){
 
   int i = 0;
   for(const auto & entry : fs::directory_iterator(path)){
+
     arrFileName[i] = entry.path();
+
     while(i!=numberOfFile){
       i++;
       break;
     }
   }
 
-  cout<<"Beginnig studing..."<<endl;
+  cout<<endl<<"================"<<endl<<"Beginnig studing..."<<endl<<"----------------"<<endl;
 
   study_func(arrFileName, numberOfFile);
 
-  cout<<"Starting make model-file"<<endl;
+  cout<<"Starting make model-file"<<endl<<"----------------"<<endl;
 
   model_make();
 
-  cout<<"End!"<<endl;
+  cout<<"Create selection file"<<endl<<"----------------"<<endl;
+
+  selection_create();
+
+  cout<<"End!"<<endl<<"================"<<endl<<endl;
 
   delete [] arrFileName;
 
