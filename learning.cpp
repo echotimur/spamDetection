@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <filesystem>
+#include "lib.h"
 
 namespace fs = std::filesystem;
 using namespace std;
@@ -18,32 +19,6 @@ const string predlogi[] = {
   "Как", "Со"
 };
 const auto sizePredlogi = size(predlogi);
-
-
-
-void split(string &str, char delim, vector<string> &v){
-  size_t start;
-  size_t end = 0;
-
-  while ((start = str.find_first_not_of(delim, end)) != string::npos){
-    end = str.find(delim, start);
-    v.push_back(str.substr(start, end - start));
-  }
-}
-
-
-
-string charConvertToString(char* a, int size){
-
-  int i;
-  string s = "";
-  for (i = 0; i < size; i++){
-    s = s + a[i];
-  }
-
-  return s;
-
-}
 
 
 
@@ -64,7 +39,7 @@ string punctuation_marks(string checkingWord){
     } else continue;
   }
 
-  checkingWord = charConvertToString(checkArray1, length);
+  checkingWord = own::charConvertToString(checkArray1, length);
 
   delete [] checkArray1;
 
@@ -83,7 +58,7 @@ void selection_create(){
   map <int, string> toSelect;
 
   while(getline(model, buffer)){
-    split(buffer, ' ', a);
+    own::split(buffer, ' ', a);
     toSelect.emplace(stoi(a[1]), a[0]);
     a.clear();
   }
@@ -235,7 +210,7 @@ void model_make(){
 
     if(num1 == 999) break;
 
-    split(transit, ' ', a);
+    own::split(transit, ' ', a);
 
     prom1.open("../temporary_files/prom1.txt", ios::in);
     while(getline(prom1, transit2)){
@@ -245,7 +220,7 @@ void model_make(){
         continue;
       }
 
-      split(transit2, ' ', b);
+      own::split(transit2, ' ', b);
       if(a[0] == b[0]){
 
         add = false;
@@ -291,7 +266,7 @@ void study_func(string fileName[], int numFile){
   // просто собираем все исходные текстовые в один...
   fstream study("../temporary_files/study.txt", ios::app);
 
-  long int wordCount = 0;
+  long long int wordCount = 0;
 
   for(int i=0; i<numFile; i++){
     fstream file(fileName[i]);
@@ -319,6 +294,7 @@ void study_func(string fileName[], int numFile){
 
 int main(){
   // очищаем все документы, перед началом. (Важно!:сделать контроль версий model.txt)
+  int start = clock();
   remove("../temporary_files/study.txt");
 
   remove("../temporary_files/prom.txt");
@@ -362,6 +338,13 @@ int main(){
   cout<<"End!"<<endl<<"================"<<endl<<endl;
 
   delete [] arrFileName;
+
+  int end = clock();
+
+  string func = __FUNCTION__;
+
+  own::LogFile obj{"../logfile.txt", "SUCCESS", start, end, func};
+  obj.logger();
 
   return 0;
 
