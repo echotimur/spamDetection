@@ -22,6 +22,8 @@ const auto sizePredlogi = size(predlogi);
 
 
 
+
+
 string punctuation_marks(string checkingWord){
 
   int length = checkingWord.length();
@@ -50,7 +52,7 @@ string punctuation_marks(string checkingWord){
 
 void selection_create(){
 
-  fstream model("../model.txt", ios::in);
+  fstream model("../temporary_files/model_derivative.txt", ios::in);
 
   string buffer = "";
 
@@ -81,6 +83,7 @@ void model_make(){
   fstream study("../temporary_files/study.txt", ios::in);
   fstream prom("../temporary_files/prom.txt", ios::app);
   fstream model("../model.txt", ios::app);
+  fstream model_derivative("../temporary_files/model_derivative.txt", ios::app);
 
   if(!study.is_open() || !model.is_open() || !prom.is_open()){
     cout<<"Error";
@@ -205,6 +208,8 @@ void model_make(){
   prom.close();
   prom1.close();
 
+  const auto &request1 = "CREATE TABLE words(\n    id INT NOT NULL KEY AUTO_INCREMENT,\n    word TEXT,\n    count INT\n);\n\n";
+  model<<request1;
   prom.open("../temporary_files/prom.txt", ios::in);
   while(getline(prom, transit)){
 
@@ -228,10 +233,15 @@ void model_make(){
         wordCount = stoi(a[1]) + stoi(b[1]);
         a[1] = to_string(wordCount);
 
-        for(const auto &word : a){
-          model<<word<<' ';
-        }
-        model<<"\n";
+      const auto &word1 = a[0];
+      const auto &word2 = a[1];
+      const auto &request2 = "INSERT INTO words(`word`, `count`) VALUES('" + a[0] + "', " + a[1] + ");\n";
+      model<<request2;
+
+      for(const auto &word : a){
+        model_derivative<<word<<' ';
+      }
+      model_derivative<<"\n";
 
         b.clear();
         wordCount = 0;
@@ -243,10 +253,17 @@ void model_make(){
     }
 
     if(add == true){
+
+      const auto &word1 = a[0];
+      const auto &word2 = a[1];
+      const auto &request2 = "INSERT INTO words(`word`, `count`) VALUES('" + a[0] + "', " + a[1] + ");\n";
+      model<<request2;
+
       for(const auto &word : a){
-        model<<word<<' ';
+        model_derivative<<word<<' ';
       }
-      model<<"\n";
+      model_derivative<<"\n";
+
     }
 
     a.clear();
@@ -299,6 +316,7 @@ int main(){
 
   remove("../temporary_files/prom.txt");
   remove("../temporary_files/prom1.txt");
+  remove("../temporary_files/model_derivative.txt");
 
   remove("../model.txt");
   remove("../selection.txt");
@@ -343,7 +361,7 @@ int main(){
 
   string func = __FUNCTION__;
 
-  own::LogFile obj{"../logfile.txt", "SUCCESS", start, end, func};
+  own::LogConsole obj{"SUCCESS", start, end, func};
   obj.logger();
 
   return 0;
