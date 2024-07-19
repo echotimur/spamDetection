@@ -4,25 +4,37 @@
 #include <chrono>
 #include <ctime>
 
+
 namespace own{
+  
+
+struct LogData{
+
+    int startTime;
+    int endTime;
+    std::string func;
+
+    LogData(int startTime, int endTime, std::string func) : startTime{startTime}, endTime{endTime}, func{func}{
+    }
+
+};
+
+
 
 
 template <typename T>
 
-class LogFile{
+class LogFile : LogData{
 
   private:
 
     std::string way;
     T process;
-    int startTime;
-    int endTime;
-    std::string func;
+
 
   public:
 
-    LogFile(std::string way, T process, int startTime, int endTime, std::string func) : way{way}, process{process}, startTime{startTime}, endTime{endTime}, func{func}
-    {
+    LogFile(std::string way, T process, int startTime, int endTime, std::string func) : LogData(startTime, endTime, func), process{process}, way{way}{
     }
 
     void logger(){
@@ -36,6 +48,35 @@ class LogFile{
       logfile<<'|'<<ctime(&current_time_t)<<"|Execution time (sec): "<<t<<std::endl<<"|In function: "<<func<<std::endl<<"|The result of execute: "<<process<<std::endl<<"----------------"<<std::endl<<std::endl;
 
       logfile.close();
+    }
+
+};
+
+
+
+template <typename T>
+
+class LogConsole : LogData{
+
+  private:
+
+    T process;
+
+
+  public:
+
+    LogConsole(T process, int startTime, int endTime, std::string func) : LogData(startTime, endTime, func), process{process}{
+    }
+
+    void logger(){
+
+      auto current_time = std::chrono::system_clock::now();
+      int t = (endTime - startTime) / CLOCKS_PER_SEC;
+
+      std::time_t current_time_t = std::chrono::system_clock::to_time_t(current_time);
+
+      std::cout<<'|'<<ctime(&current_time_t)<<"|Execution time (sec): "<<t<<std::endl<<"|In function: "<<func<<std::endl<<"|The result of execute: "<<process<<std::endl<<"----------------"<<std::endl<<std::endl;
+
     }
 
 };
