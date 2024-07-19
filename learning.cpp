@@ -361,7 +361,7 @@ int main(){
 
   string func = __FUNCTION__;
 
-  own::LogConsole obj{"SUCCESS", start, end, func};
+  own::LogFile obj{"SUCCESS", start, end, func};
   obj.logger();
 
   return 0;
