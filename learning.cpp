@@ -310,7 +310,7 @@ void study_func(string fileName[], int numFile){
 
 
 int main(){
-  // очищаем все документы, перед началом. (Важно!:сделать контроль версий model.txt)
+  // очищаем все документы, перед началом
   int start = clock();
   remove("../temporary_files/study.txt");
 
