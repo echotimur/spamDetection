@@ -1,1 +1,1 @@
-In this directory you can place files to create a model
+В эту директорию необходимо помещать TXT файлы с предполагаемым спамом
